@@ -28,6 +28,9 @@ function copyFixBase {
         [Parameter(Mandatory=$true)] [String]$newFixAppRoot
     )
     Copy-Item -Force -Recurse -Verbose ($baseFixAppRoot + "\*") -Destination $newFixAppRoot
+    if((Test-Path -Path ($newFixAppRoot + "\packages"))){
+        Remove-Item -Recurse -Force ($newFixAppRoot + "\packages")
+    }
     Write-Host -NoNewline -ForegroundColor Black -BackgroundColor Green "`n-- INFO --`t" 
     Write-Host -ForegroundColor Green -BackgroundColor Black ("Base Files Have Been Copied To: " + $newFixAppRoot)    
 }
@@ -52,7 +55,7 @@ function renameFix{
         [Parameter(Mandatory=$true)] [String]$fixName
     )
     $newFixAppRoot = $scriptDir + '\' + $fixName
-    Get-ChildItem -Recurse $newFixAppRoot | Where-Object {$_.Name -match "FixBase"} | Rename-Item -NewName {$_.Name.replace("FixBase",$fixName)}
+    Get-ChildItem -Recurse $newFixAppRoot | Where-Object {$_.Name -match "FixBase"} | Rename-Item -NewName {$_.Name.replace("FixBase", $fixName)}
     Get-Childitem $newFixAppRoot -Recurse | ?{ ! $_.PSIsContainer } |Select-Object -Expand Fullname | ForEach-Object { (Get-Content $_) -Replace "FixBase", $fixName | Set-Content $_ }
     Write-Host -NoNewline -ForegroundColor Black -BackgroundColor Green "`n-- INFO --`t" 
     Write-Host -ForegroundColor Green -BackgroundColor Black ("All necessary files have been renamed.")
